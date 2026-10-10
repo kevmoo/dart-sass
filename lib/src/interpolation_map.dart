@@ -134,8 +134,13 @@ final class InterpolationMap(
     // This produces slightly incorrect mappings if there are _unnecessary_
     // escapes in the source file, but that's unlikely enough that it's probably
     // not worth doing a reparse here to fix it.
+    var maxOffset = index == _interpolation.contents.length - 1
+        ? _interpolation.span.end.offset
+        : _expandInterpolationSpanLeft(
+            (_interpolation.contents[index + 1] as Expression).span.start,
+          );
     return previousLocation.file.location(
-      previousLocation.offset + offsetInString,
+      math.min(previousLocation.offset + offsetInString, maxOffset),
     );
   }
 

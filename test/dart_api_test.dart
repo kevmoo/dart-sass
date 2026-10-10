@@ -391,4 +391,17 @@ void main() {
     // Give the race condition time to appear.
     await pumpEventQueue();
   });
+
+  group("parser and selector edge cases", () {
+    test("length-expanding hex escape in selector error span doesn't throw RangeError", () {
+      expect(
+        () => compileString(r'[c\c', syntax: Syntax.sass, logger: Logger.quiet),
+        throwsA(isA<SassRuntimeException>()),
+      );
+      expect(
+        () => compileString(r'[c\c{}'),
+        throwsA(isA<SassRuntimeException>()),
+      );
+    });
+  });
 }
