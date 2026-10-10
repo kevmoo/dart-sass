@@ -264,12 +264,12 @@ final class SelectorList(Iterable<ComplexSelector> components, super.span)
 
     return parent.components.map((complex) {
       try {
-        var lastComponent = complex.components.last;
-        if (lastComponent.combinators.isNotEmpty) {
+        var lastComponent = complex.components.lastOrNull;
+        if (lastComponent == null || lastComponent.combinators.isNotEmpty) {
           throw MultiSpanSassException(
             'Selector "$complex" can\'t be used as a parent in a compound '
                 'selector.',
-            lastComponent.span.trimRight(),
+            (lastComponent?.span ?? complex.span).trimRight(),
             "outer selector",
             {parentSelector.span: "parent selector"},
           );

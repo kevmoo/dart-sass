@@ -12,6 +12,7 @@ import 'package:test_descriptor/test_descriptor.dart' as d;
 
 import 'package:sass/sass.dart';
 import 'package:sass/src/ast/sass.dart';
+import 'package:sass/src/ast/selector.dart';
 import 'package:sass/src/exception.dart';
 
 import 'dart_api/test_importer.dart';
@@ -459,6 +460,18 @@ void main() {
       expect((sheet.children[4] as FunctionRule).nameSpan.text, equals('fn'));
       expect((sheet.children[5] as MixinRule).nameSpan.text, equals('mx'));
       expect((sheet.children[6] as IncludeRule).nameSpan.text, equals('mx'));
+    });
+
+    test("combinator-only complex selectors don't throw StateError in unify or append", () {
+      var barePlus = SelectorList.parse('+');
+      expect(barePlus.isUseless, isTrue);
+      expect(barePlus.unify(SelectorList.parse('.foo')), isNull);
+      expect(
+        () => compileString(
+          '@use "sass:selector"; a { b: selector.append("+", ".foo"); }',
+        ),
+        throwsA(isA<SassRuntimeException>()),
+      );
     });
   });
 }

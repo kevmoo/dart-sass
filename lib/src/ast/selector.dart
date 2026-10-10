@@ -178,6 +178,7 @@ class const _IsBogusVisitor({
 class const _IsUselessVisitor() with AnySelectorVisitor {
   @override
   bool visitComplexSelector(ComplexSelector complex) =>
+      complex.components.isEmpty ||
       complex.leadingCombinators.length > 1 ||
       complex.components.any(
         (component) =>
