@@ -11,6 +11,7 @@ import 'package:test/test.dart';
 import 'package:test_descriptor/test_descriptor.dart' as d;
 
 import 'package:sass/sass.dart';
+import 'package:sass/src/ast/sass.dart';
 import 'package:sass/src/exception.dart';
 
 import 'dart_api/test_importer.dart';
@@ -408,6 +409,17 @@ void main() {
       expect(
         () => compileString('a { @extend #{ // */\n"&"}a; }'),
         throwsA(isA<SassException>()),
+      );
+    });
+
+    test("top-level indentation after leading blank line in .sass throws SassFormatException", () {
+      expect(
+        () => compileString('\n  a\n    color: red', syntax: Syntax.sass),
+        throwsA(isA<SassFormatException>()),
+      );
+      expect(
+        () => Stylesheet.parseSass('\n  a: b'),
+        throwsA(isA<SassFormatException>()),
       );
     });
   });

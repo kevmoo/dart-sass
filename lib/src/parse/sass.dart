@@ -166,7 +166,14 @@ class SassParser(super.contents, {super.url, super.parseSelectors})
     while (!scanner.isDone) {
       if (_child(statement) case var child?) statements.add(child);
       var indentation = _readIndentation();
-      assert(indentation == 0);
+      if (indentation != 0) {
+        assert(statements.isEmpty);
+        scanner.error(
+          "Indenting at the beginning of the document is illegal.",
+          position: 0,
+          length: scanner.position,
+        );
+      }
     }
     return statements;
   }
