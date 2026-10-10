@@ -29,6 +29,27 @@ final class ParentSelector(
   /// @nodoc
   @override
   @internal
-  List<SimpleSelector> unify(List<SimpleSelector> compound) =>
-      throw UnsupportedError("& doesn't support unification.");
+  List<SimpleSelector>? unify(List<SimpleSelector> compound) {
+    if (suffix != null) {
+      throw UnsupportedError("& with a suffix doesn't support unification.");
+    }
+    if (compound case [var other]
+        when other is UniversalSelector ||
+            (other is PseudoSelector &&
+                (other.isHost || other.isHostContext))) {
+      return other.unify([this]);
+    }
+    if (compound.contains(this)) return compound;
+    if (compound.firstOrNull case UniversalSelector() || TypeSelector()) {
+      return [compound.first, this, ...compound.skip(1)];
+    }
+    return [this, ...compound];
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is ParentSelector && other.suffix == suffix;
+
+  @override
+  int get hashCode => suffix.hashCode;
 }

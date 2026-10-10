@@ -473,5 +473,20 @@ void main() {
         throwsA(isA<SassRuntimeException>()),
       );
     });
+
+    test("top-level parent selector '&' supports unification in @extend", () {
+      expect(
+        compileString('.foo.bar { color: red; } & { @extend .foo; }'),
+        equals('.foo.bar, &.bar {\n  color: red;\n}'),
+      );
+      expect(
+        compileString('div.foo { color: red; } & { @extend .foo; }'),
+        equals('div.foo, div& {\n  color: red;\n}'),
+      );
+      expect(
+        SelectorList.parse('&').isSuperselector(SelectorList.parse('&')),
+        isTrue,
+      );
+    });
   });
 }
