@@ -127,7 +127,7 @@ final class ParameterList implements SassNode {
     if (name == restParameter) {
       var text = span.text;
       var fromDollar = text.substring(text.lastIndexOf("\$"));
-      return fromDollar.substring(0, text.indexOf("."));
+      return fromDollar.substring(0, fromDollar.indexOf("."));
     }
 
     for (var parameter in parameters) {

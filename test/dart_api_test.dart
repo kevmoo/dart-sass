@@ -422,5 +422,16 @@ void main() {
         throwsA(isA<SassFormatException>()),
       );
     });
+
+    test("duplicate rest parameter name throws SassFormatException", () {
+      expect(
+        () => compileString(r'@mixin m($a, $a...) {}'),
+        throwsA(isA<SassFormatException>()),
+      );
+      expect(
+        () => compileString(r'@function f($a, $a...) { @return $a; }'),
+        throwsA(isA<SassFormatException>()),
+      );
+    });
   });
 }

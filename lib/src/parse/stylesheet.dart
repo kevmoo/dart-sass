@@ -1816,6 +1816,9 @@ abstract class StylesheetParser(
       } else if (scanner.scanChar($dot)) {
         scanner.expectChar($dot);
         scanner.expectChar($dot);
+        if (!named.add(name)) {
+          error("Duplicate parameter.", spanFrom(variableStart));
+        }
         whitespace(consumeNewlines: true);
         if (scanner.scanChar($comma)) whitespace(consumeNewlines: true);
         restParameter = name;
