@@ -433,5 +433,32 @@ void main() {
         throwsA(isA<SassFormatException>()),
       );
     });
+
+    test("comments between at-rule keyword and URL or identifier don't corrupt spans", () {
+      var sheet = Stylesheet.parseScss('''
+          @use /* block */ "used";
+          @use // line
+          "used2";
+          @forward /* block */ "forwarded";
+          @forward // line
+          "forwarded2";
+          @function /* block */ fn() { @return 1; }
+          @mixin /* block */ mx() {}
+          @include /* block */ mx;
+        ''');
+      expect((sheet.children[0] as UseRule).urlSpan.text, equals('"used"'));
+      expect((sheet.children[1] as UseRule).urlSpan.text, equals('"used2"'));
+      expect(
+        (sheet.children[2] as ForwardRule).urlSpan.text,
+        equals('"forwarded"'),
+      );
+      expect(
+        (sheet.children[3] as ForwardRule).urlSpan.text,
+        equals('"forwarded2"'),
+      );
+      expect((sheet.children[4] as FunctionRule).nameSpan.text, equals('fn'));
+      expect((sheet.children[5] as MixinRule).nameSpan.text, equals('mx'));
+      expect((sheet.children[6] as IncludeRule).nameSpan.text, equals('mx'));
+    });
   });
 }

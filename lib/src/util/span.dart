@@ -91,13 +91,14 @@ extension SpanExtensions on FileSpan {
     return subspan(0, scanner.position);
   }
 
-  /// Returns a subspan excluding an initial at-rule and any whitespace after
-  /// it.
+  /// Returns a subspan excluding an initial at-rule and any whitespace or
+  /// comments after it.
   FileSpan withoutInitialAtRule() {
     var scanner = StringScanner(text);
     scanner.expectChar($at);
     _scanIdentifier(scanner);
-    return subspan(scanner.position).trimLeft();
+    _scanWhitespaceAndComments(scanner);
+    return subspan(scanner.position);
   }
 
   /// Returns a span covering the text after this span and before [other].
@@ -165,6 +166,35 @@ void _scanIdentifier(StringScanner scanner) {
         scanner.readChar();
       case _:
         break loop;
+    }
+  }
+}
+
+/// Consumes whitespace and comments from [scanner].
+void _scanWhitespaceAndComments(StringScanner scanner) {
+  while (!scanner.isDone) {
+    var next = scanner.peekChar()!;
+    if (next.isWhitespace) {
+      scanner.readChar();
+      continue;
+    }
+    if (next != $slash) break;
+    switch (scanner.peekChar(1)) {
+      case $slash:
+        scanner.readChar();
+        scanner.readChar();
+        while (!scanner.isDone && !scanner.readChar().isNewline) {}
+      case $asterisk:
+        scanner.readChar();
+        scanner.readChar();
+        while (!scanner.isDone) {
+          var char = scanner.readChar();
+          if (char != $asterisk) continue;
+          while (!scanner.isDone && (char = scanner.readChar()) == $asterisk) {}
+          if (char == $slash) break;
+        }
+      default:
+        return;
     }
   }
 }
