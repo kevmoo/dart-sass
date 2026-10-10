@@ -161,28 +161,33 @@ final class InterpolationMap(
   /// reporting that's probably fine.
   int _expandInterpolationSpanLeft(FileLocation start) {
     var source = start.file.codeUnits;
+    var minOffset = _interpolation.span.start.offset;
     var i = start.offset - 1;
-    while (i >= 0) {
+    while (i >= minOffset) {
       var prev = source[i--];
       if (prev == $lbrace) {
-        if (source[i] == $hash) break;
-      } else if (prev == $slash) {
+        if (i >= minOffset && source[i] == $hash) return i;
+      } else if (prev == $slash && i >= minOffset) {
         var second = source[i--];
         if (second == $asterisk) {
-          while (true) {
+          var beforeComment = i;
+          var foundCommentStart = false;
+          while (i >= minOffset) {
             var char = source[i--];
             if (char != $asterisk) continue;
 
-            do {
-              char = source[i--];
-            } while (char == $asterisk);
-            if (char == $slash) break;
+            while (i >= minOffset && (char = source[i--]) == $asterisk) {}
+            if (char == $slash) {
+              foundCommentStart = true;
+              break;
+            }
           }
+          if (!foundCommentStart) i = beforeComment;
         }
       }
     }
 
-    return i;
+    return math.max(0, minOffset);
   }
 
   /// Given the end of a [FileSpan] covering an interpolated expression, returns
@@ -197,18 +202,16 @@ final class InterpolationMap(
     var i = end.offset;
     while (i < source.length) {
       var next = source[i++];
-      if (next == $slash) {
+      if (next == $slash && i < source.length) {
         var second = source[i++];
         if (second == $slash) {
-          while (!source[i++].isNewline) {}
+          while (i < source.length && !source[i++].isNewline) {}
         } else if (second == $asterisk) {
-          while (true) {
+          while (i < source.length) {
             var char = source[i++];
             if (char != $asterisk) continue;
 
-            do {
-              char = source[i++];
-            } while (char == $asterisk);
+            while (i < source.length && (char = source[i++]) == $asterisk) {}
             if (char == $slash) break;
           }
         }

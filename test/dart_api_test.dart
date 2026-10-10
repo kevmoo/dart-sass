@@ -403,5 +403,12 @@ void main() {
         throwsA(isA<SassRuntimeException>()),
       );
     });
+
+    test("'*/' inside single-line comment in interpolation span mapping doesn't throw RangeError", () {
+      expect(
+        () => compileString('a { @extend #{ // */\n"&"}a; }'),
+        throwsA(isA<SassException>()),
+      );
+    });
   });
 }
